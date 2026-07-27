@@ -2,7 +2,7 @@
 
 ![Python version](https://img.shields.io/badge/Python-3.9+-blue)
 [![Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-CausalDemand-yellow)](https://huggingface.co/datasets/jean-jsj/CausalDemand)
-[![DOI](https://img.shields.io/badge/DOI-10.57967%2Fhf%2F9681-blue)](https://doi.org/10.57967/hf/9681)
+[![DOI](https://img.shields.io/badge/DOI-10.57967%2Fhf%2F9732-blue)](https://doi.org/10.57967/hf/9732)
 
 ## Introduction
 
@@ -136,7 +136,7 @@ Please consider citing if you reference or use CausalDemand in your work:
       author    = {Hong, Juwon and Hwang, Minha and Shankar, Venkatesh},
       title     = {CausalDemand: A Causal Demand Benchmark},
       year      = {2026},
-      doi       = {10.57967/hf/9681},
+      doi       = {10.57967/hf/9732},
       publisher = {Hugging Face},
       url       = {https://huggingface.co/datasets/jean-jsj/CausalDemand}
     }

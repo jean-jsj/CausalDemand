@@ -70,7 +70,7 @@ training production pricing systems.
 ## Distribution
 
 Data: Hugging Face [`jean-jsj/CausalDemand`](https://huggingface.co/datasets/jean-jsj/CausalDemand), CC BY 4.0, archived
-under DOI [10.57967/hf/9681](https://doi.org/10.57967/hf/9681). Evaluation and scoring code:
+under DOI [10.57967/hf/9732](https://doi.org/10.57967/hf/9732). Evaluation and scoring code:
 [github.com/jean-jsj/CausalDemand](https://github.com/jean-jsj/CausalDemand), Apache-2.0.
 
 ## Maintenance
