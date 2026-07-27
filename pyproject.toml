@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "causaldemand"
+version = "0.5.0.dev0"
+description = "Scoring and reference baselines for CausalDemand, a causal-demand benchmark."
+readme = { file = "README.md", content-type = "text/markdown" }
+license = { text = "Apache-2.0" }
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.21",
+    "pandas>=1.4",
+]
+
+[project.optional-dependencies]
+baselines = [
+    "statsmodels>=0.13",
+    "scikit-learn>=1.1",
+]
+data = [
+    "huggingface_hub",
+]
+
+[project.scripts]
+causaldemand = "causaldemand.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/jean-jsj/CausalDemand"
+Dataset = "https://huggingface.co/datasets/jean-jsj/CausalDemand"
+
+[tool.setuptools]
+packages = ["causaldemand", "causaldemand.baselines"]
