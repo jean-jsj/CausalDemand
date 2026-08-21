@@ -109,7 +109,7 @@ demand quantities it shapes.
 |---|---|
 | `transactions_full_hidden.csv` | the full 156-week panel including zero-sale weeks and the holdout realizations (`carried` flags stocked pairs); its last 16 weeks are the forecasting truth |
 | `elasticity_truth_hidden.csv` | one row per (priced, affected) product pair: `epsilon_star` (the true elasticity), `epsilon_star_conditional`, `support` |
-| `counterfactual_sweep_truth_hidden.csv` | the replayed truth per sweep row: `baseline_units`, `true_counterfactual_units`, own/cross decomposition, and the realized effective own elasticity |
+| `counterfactual_sweep_truth_hidden.csv` | the replayed truth per sweep row: `baseline_units`, `true_counterfactual_units`, own/cross decomposition, and the realized effective own elasticity (NaN on rows with zero baseline sales in the discrete-choice family, where no per-purchase elasticity is realized) |
 
 Eval seeds (added later) ship `public/` only; their truth stays with the
 maintainer.

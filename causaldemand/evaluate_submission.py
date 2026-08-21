@@ -117,7 +117,7 @@ def _load_cell(cell_dir: Path) -> dict[str, Any]:
 
 def _truth_frames_by_intervention(cell_dir: Path) -> dict[str, pd.DataFrame]:
     frames: dict[str, pd.DataFrame] = {}
-    # Scores every intervention in the released sweep truth (the 16 protocol interventions of the public sweep context).
+    # Scores every intervention in the released sweep truth: 16 total, 14 regular-price (8 selection rules × ±10%, two price-cut variants not generated; `sweep_single_share_highest_regular_plus10` is the regular-price control on the flagship focal) + 2 promotion-depth (`sweep_single_share_highest_plus10`, the flagship, and `sweep_single_share_promo_minus10`). All 16 are scored; the headline reads ONLY `sweep_single_share_highest_plus10`.
     path = cell_dir / "hidden" / "counterfactual_sweep_truth_hidden.csv"
     if path.exists():
         frame = pd.read_csv(path)

@@ -35,7 +35,7 @@ Missing matrix entries are scored as 0.0 (the no-information value) and counted 
 
 ## `counterfactual_deltas.csv` — counterfactual demand response (carries the ranked headline metric)
 
-One row per (intervention, product, store, week) over the 16 sweep interventions published in `public/counterfactual_sweep_context_public.csv`.
+One row per (intervention, product, store, week) over the 16 sweep interventions published in `public/counterfactual_sweep_context_public.csv`: 14 regular-price moves (8 selection rules × ±10%, with two price-cut variants not generated; `sweep_single_share_highest_regular_plus10` is the regular-price control on the flagship focal) and 2 promotion-depth moves (`sweep_single_share_highest_plus10`, the flagship, a +10% rise in the focal's effective price realized by reducing promotion depth, and `sweep_single_share_promo_minus10`, which deepens it).
 
 | column | type | meaning |
 |---|---|---|
