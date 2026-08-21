@@ -138,9 +138,19 @@ def _load_headline_context(cell_dir: Path) -> dict[str, Any]:
 
 def score_forecasting(cell_dir: Path, cell: dict[str, Any], submission_path: Path) -> dict[str, Any]:
     predictions = _read_submission(submission_path, FORECAST_COLUMNS, "sales forecasting")
-    truth = build_demand_truth(cell["transactions_full"], cell["eval_weeks"])
+    # The scored truth universe is the PREDICTION-CONTEXT universe: train-support pairs (at least one positive training-window row, exactly the public train file's carriage) × holdout weeks. Prediction rows outside it are ignored-with-count inside `demand_prediction_scores`.
+    training = cell["training"]
+    positive = training[pd.to_numeric(training["units"], errors="coerce").fillna(0.0) > 0]
+    support_pairs = pd.MultiIndex.from_arrays(
+        [positive["product_id"].astype(str), positive["store_id"].astype(str)]
+    ).drop_duplicates()
+    truth = build_demand_truth(
+        cell["transactions_full"], cell["eval_weeks"], support_pairs=support_pairs
+    )
     weights = revenue_weights(cell["training"])
-    return demand_prediction_scores(predictions, truth, weights)
+    return demand_prediction_scores(
+        predictions, truth, weights, row_universe="train_support_pairs_x_holdout_weeks"
+    )
 
 
 def score_elasticity(cell_dir: Path, cell: dict[str, Any], submission_path: Path) -> dict[str, Any]:
@@ -157,12 +167,22 @@ def score_elasticity(cell_dir: Path, cell: dict[str, Any], submission_path: Path
             columns="priced_product_id",
             values="epsilon_star_conditional",
         )
+    # The truth ships a boolean co-carriage `support` column: never-co-carried pairs are undefined (NaN truth) and excluded from every aggregate; submitted values on them are ignored-with-count.
+    support = None
+    if "support" in truth_long.columns:
+        support = truth_long.pivot(
+            index="affected_product_id", columns="priced_product_id", values="support"
+        ).astype(bool)
     eps_hat = submitted.pivot(
         index="affected_product_id", columns="priced_product_id", values="elasticity"
     )
     weights = revenue_weights(cell["training"])
     return elasticity_scores(
-        eps_hat, eps_star, weights, eps_star_conditional=eps_star_conditional
+        eps_hat,
+        eps_star,
+        weights,
+        eps_star_conditional=eps_star_conditional,
+        support=support,
     )
 
 
@@ -177,6 +197,8 @@ def score_counterfactual(
 
     Every intervention is scored on the geometry-blind decomposition — own-price signed WMPE (focal Δq) + substitution unsigned WAPE (competitor-only Δq), both category-netted via ΔM=ΣΔq, both pooled (micro-averaged) over store-weeks. The headline reads BOTH axes from the SINGLE scenario `sweep_single_share_highest_plus10`.
     """
+    from causaldemand.support import n_rows_out_of_support
+
     deltas = _read_submission(submission_path, COUNTERFACTUAL_COLUMNS, "counterfactual prediction")
     truths = _truth_frames_by_intervention(cell_dir)
     geom = _load_headline_context(cell_dir)
@@ -184,6 +206,10 @@ def score_counterfactual(
     interventions: list[dict[str, Any]] = []
     for intervention_id, truth in sorted(truths.items()):
         sub = deltas[deltas["intervention_id"] == intervention_id]
+        # ignore-with-count: submitted rows with no matching truth key (non-carried pairs, out-of-window weeks, phantom products) are structurally dropped by the truth-side left join below; count them so the diagnostics surface what was ignored.
+        n_ignored_out_of_support = n_rows_out_of_support(
+            sub, truth, ["product_id", "store_id", "week"]
+        )
         merged = truth.merge(
             sub[["product_id", "store_id", "week", "predicted_delta_units"]],
             on=["product_id", "store_id", "week"],
@@ -218,6 +244,7 @@ def score_counterfactual(
                 "n_truth_rows_without_submission": int(
                     merged["predicted_delta_units"].isna().sum()
                 ),
+                "n_submission_rows_ignored_out_of_support": n_ignored_out_of_support,
             }
         interventions.append(result)
 
@@ -227,17 +254,27 @@ def score_counterfactual(
         "metric": "counterfactual_wmpe_wape_pair",
         "spec_reference": "docs/SUBMISSION_FORMAT.md (counterfactual prediction headline)",
         "headline_components": ["own_price_wmpe", "substitution_wape"],
+        # the scored truth universe, all interventions
+        "row_universe": "train_support_pairs_x_eval_weeks (carried-only; == public sweep context universe)",
         "headline": {
             "scenario": HEADLINE_INTERVENTION,
             "rank_metric": "own_price.abs_own_price_wmpe",   # |signed WMPE|, ascending
             "own_price": {
                 "own_price_wmpe": hl.get("own_price_wmpe"),
+                "own_price_status": hl.get("own_price_status"),
                 "n_store_weeks_focal_missing": hl.get("n_store_weeks_focal_missing"),
+                # netting universe is carrying stores only
+                "n_stores_focal_carrying": hl.get("n_stores_focal_carrying"),
+                "n_stores_total": hl.get("n_stores_total"),
             },
             "substitution": {
                 "substitution_wape": hl.get("substitution_wape"),
+                "substitution_status": hl.get("substitution_status"),
                 "n_store_weeks_scored": hl.get("n_store_weeks_scored"),
             },
+            "n_submission_rows_ignored_out_of_support": hl.get(
+                "n_submission_rows_ignored_out_of_support"
+            ),
         },
         "interventions": interventions,
     }

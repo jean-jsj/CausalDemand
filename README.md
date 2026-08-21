@@ -23,7 +23,7 @@ The two cells of an on/off pair draw byte-identical cost, price, promotion, and 
 
 - Sales forecasting: predict units for the 16 withheld weeks. Scored by forecast error (revenue-weighted WMAPE) and bias.
 - Elasticity recovery: submit the 40x40 own- and cross-price elasticity matrix. Scored by sign accuracy, substitute/complement F1, cross-effect ranking (NDCG), magnitude error, and bias.
-- Counterfactual prediction: predict the change in units under 16 published price scenarios that never occurred. Scored by own-price bias, the signed error on the flagship +10% scenario, which is **the ranked headline** (0 = unbiased), plus an unranked substitution error.
+- Counterfactual prediction: predict the change in units under 16 published price scenarios that never occurred. Scored by own-price bias, the signed error on the flagship scenario (the highest-share product's effective price +10% via reduced promotion depth), which is **the ranked headline** (0 = unbiased), plus an unranked substitution error.
 - Validity checks: label-free coherence checks on a real panel. Reported PASS / WARN / FAIL, never ranked.
 
 The leaderboard ranks own-price bias per demand family and displays the forecast error beside it, never ranked, because the benchmark's point is that the two diverge.

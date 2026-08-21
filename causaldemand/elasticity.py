@@ -100,7 +100,9 @@ def _ndcg(eps_hat: pd.DataFrame, eps_star: pd.DataFrame, k: int) -> float | None
     """Mean NDCG@k over focal products: rank others by |ε̂_ij|, gains |ε*_ij|."""
     scores: list[float] = []
     for i in eps_star.index:
-        others = [j for j in eps_star.columns if j != i]
+        # Undefined truth entries (NaN: never-co-carried pairs) leave the ranking universe of their focal row; the submission is neither rewarded nor penalized for how it orders an entry the answer key does not define.
+        row = eps_star.loc[i]
+        others = [j for j in eps_star.columns if j != i and pd.notna(row[j])]
         if not others:
             continue
         true_gain = eps_star.loc[i, others].abs()
@@ -140,34 +142,61 @@ def elasticity_scores(
     weights: pd.Series,
     *,
     eps_star_conditional: pd.DataFrame | None = None,
+    support: pd.DataFrame | None = None,
     unrelated_threshold_pct: float = 0.20,
     ndcg_k: int | None = None,
 ) -> dict[str, Any]:
     """Score a J×J estimated elasticity matrix against truth.
 
-    All frames are indexed affected_product_id × priced_product_id. `eps_star` is the scored truth (the TOTAL elasticity, incidence margin included). `eps_star_conditional`, when supplied, is the fixed-M switching matrix: class stratification then runs on conditional values, with predictions classed on ε̂ − ε*_M(j) (the true incidence component, column-constant, derived as total − conditional). Without it, classification falls back to the total values. The submission must cover the full matrix; missing entries are reported and treated as 0.0 (the no-information value) rather than dropped, so a partial submission cannot shrink its own denominator.
+    All frames are indexed affected_product_id × priced_product_id. `eps_star` is the scored truth (the TOTAL elasticity, incidence margin included). `eps_star_conditional`, when supplied, is the fixed-M switching matrix: class stratification then runs on conditional values, with predictions classed on ε̂ − ε*_M(j) (the true incidence component, column-constant, derived as total − conditional). Without it, classification falls back to the total values. The submission must cover the full DEFINED matrix; missing entries are reported and treated as 0.0 (the no-information value) rather than dropped, so a partial submission cannot shrink its own denominator.
+
+    Co-carriage support. `support`, when supplied, is the J×J boolean frame the truth ships (the `support` column of `elasticity_truth_hidden.csv`). An entry with `support=False` OR a NaN truth value is UNDEFINED: the (affected, priced) pair is never co-carried in the evaluation window, so its elasticity is dropped from EVERY aggregate (sign accuracy, F1 classes, the unrelated-threshold quantile, NDCG ranking universes, all magnitude/bias blocks). Submitted values on undefined entries are ignored-with-count, and `n_matrix_entries_missing_in_submission` / `submission_complete` count DEFINED entries only. Both model families use the same convention.
     """
     products = list(eps_star.index)
+    j = len(products)
+    star_arr = eps_star.to_numpy(dtype=float)
+    if support is not None:
+        sup_arr = (
+            support.reindex(index=eps_star.index, columns=eps_star.columns)
+            .fillna(False)
+            .astype(bool)
+            .to_numpy()
+        )
+    else:
+        sup_arr = np.ones((j, j), dtype=bool)
+    # undefined = flagged unsupported OR NaN truth (the two coincide at emission; a NaN truth value must never enter a mean)
+    defined = sup_arr & ~np.isnan(star_arr)
+    n_unsupported_excluded = int((~defined).sum())
+
     aligned_hat = eps_hat.reindex(index=eps_star.index, columns=eps_star.columns)
-    n_missing = int(aligned_hat.isna().to_numpy().sum())
+    submitted_mask = aligned_hat.notna().to_numpy()
+    # ignore-with-count: submitted values outside the truth's J×J index, or sitting on undefined cells, never enter any aggregate
+    n_submitted_total = int(eps_hat.notna().to_numpy().sum())
+    n_ignored_out_of_matrix = n_submitted_total - int(submitted_mask.sum())
+    n_ignored_unsupported = int((submitted_mask & ~defined).sum())
+    n_missing = int((~submitted_mask & defined).sum())  # completeness over DEFINED entries only
     aligned_hat = aligned_hat.fillna(0.0)
     w = weights.reindex(eps_star.index).fillna(0.0).astype(float)
 
-    # --- own-price (diagonal) ---
-    own_star = np.diag(eps_star.to_numpy(dtype=float))
-    own_hat = np.diag(aligned_hat.to_numpy(dtype=float))
-    own_w = w.to_numpy(dtype=float)
+    # --- own-price (diagonal; defined entries only) ---
+    diag_defined = np.diag(defined)
+    own_star = np.diag(star_arr)[diag_defined]
+    own_hat = np.diag(aligned_hat.to_numpy(dtype=float))[diag_defined]
+    own_w = w.to_numpy(dtype=float)[diag_defined]
     own_block = {
-        "sign_accuracy": float(np.mean(_sign(own_hat) == _sign(own_star))),
+        "sign_accuracy": (
+            float(np.mean(_sign(own_hat) == _sign(own_star))) if own_hat.size else None
+        ),
         **_magnitude_bias_block(own_hat, own_star, own_w),
+        "n_diagonal_excluded_unsupported": int((~diag_defined).sum()),
     }
 
-    # --- cross-price (off-diagonal) ---
-    j = len(products)
-    off_mask = ~np.eye(j, dtype=bool)
-    star_off = eps_star.to_numpy(dtype=float)[off_mask]
+    # --- cross-price (off-diagonal; defined entries only) ---
+    off_mask = ~np.eye(j, dtype=bool) & defined
+    star_off = star_arr[off_mask]
     hat_off = aligned_hat.to_numpy(dtype=float)[off_mask]
-    w_off = np.repeat(own_w, j).reshape(j, j)[off_mask]  # w_i of the affected (focal) product
+    w_full = w.to_numpy(dtype=float)
+    w_off = np.repeat(w_full, j).reshape(j, j)[off_mask]  # w_i of the affected (focal) product
 
     if eps_star_conditional is not None:
         aligned_cond = eps_star_conditional.reindex(
@@ -199,11 +228,15 @@ def elasticity_scores(
 
     if ndcg_k is None:
         ndcg_k = j - 1
+    # NDCG ranks within each focal row over DEFINED others only (undefined truth entries are NaN-masked so `_ndcg` drops them)
+    star_masked = pd.DataFrame(
+        np.where(defined, star_arr, np.nan), index=eps_star.index, columns=eps_star.columns
+    )
     cross_block: dict[str, Any] = {
         "f1_per_class": _f1_per_class(true_labels, pred_labels, classes),
-        "ndcg": _ndcg(aligned_hat, eps_star, ndcg_k),
+        "ndcg": _ndcg(aligned_hat, star_masked, ndcg_k),
         "ndcg_k": int(ndcg_k),
-        "ndcg_at_5": _ndcg(aligned_hat, eps_star, min(5, j - 1)) if j > 1 else None,
+        "ndcg_at_5": _ndcg(aligned_hat, star_masked, min(5, j - 1)) if j > 1 else None,
         "all_pairs": _magnitude_bias_block(hat_off, star_off, w_off),
         "by_true_class": {
             cls: _magnitude_bias_block(
@@ -221,6 +254,14 @@ def elasticity_scores(
         "n_products": j,
         "n_matrix_entries_missing_in_submission": n_missing,
         "submission_complete": n_missing == 0,
+        "n_entries_unsupported_excluded": n_unsupported_excluded,
+        "n_submission_entries_ignored_out_of_matrix": n_ignored_out_of_matrix,
+        "n_submission_entries_ignored_unsupported": n_ignored_unsupported,
+        "support_convention": (
+            "co-carriage support: (affected, priced) pairs never co-carried in the "
+            "evaluation window are undefined (NaN truth, support=False) and excluded "
+            "from every aggregate; both model families identical."
+        ),
         "own_price": own_block,
         "cross_price": cross_block,
         "weighting": "focal-product observed revenue share over the public training window",

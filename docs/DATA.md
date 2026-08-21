@@ -69,12 +69,18 @@ change in units for every row.
 | `intervention_price` | float | the counterfactual price (equal to baseline for non-targeted products) |
 | `promo_cost` | float | as in the panel (promotion schedules are held fixed) |
 
-The 16 interventions are ±10% single-product moves (a random product, the
-share-highest, the share-lowest, the price-highest, the price-lowest, and a
-promo-heavy product) plus brand-level moves (leading, mid, smaller brand).
+The 16 interventions are 14 regular-price moves (±10% on the shelf price in
+every store-week of the evaluation window: a random product, the share-highest,
+the share-lowest, the price-highest, the price-lowest, and brand-level moves on
+the leading, mid, and smaller brand; two price-cut variants are not generated)
+plus 2 promotion-depth moves on the highest-share product.
 **`sweep_single_share_highest_plus10` is the flagship scenario that carries the
-ranked headline** — the highest-share product's price raised 10% in every
-store-week of the evaluation window.
+ranked headline**: a +10% rise in the highest-share product's effective price,
+realized by reducing its promotion depth, applied in the store-weeks where that
+product is on promotion (non-promotion store-weeks and all other products are
+untouched). `sweep_single_share_promo_minus10` deepens the promotion by the
+same amount. `sweep_single_share_highest_regular_plus10` is the regular-price
+control on the same product: shelf price +10% in every store-week.
 
 ### `products_public.csv` — the product table
 

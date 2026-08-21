@@ -20,6 +20,10 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+# Truth-mass floor for scoreability. Both axes divide by a pooled truth mass. The covariance_probit sweep truth comes from a finite-consumer replay, so the smallest genuine demand response it can represent is ONE consumer switching = one unit of sales. A scenario whose pooled truth denominator is at or below one unit carries no resolvable truth signal; what remains is float residue from the netting arithmetic (measured <= 3.3e-11 on the dev cells, versus >= 313 units for the smallest genuinely scoreable scenario). Such scenarios return an explicit unscoreable status instead of dividing by that residue. Denominators above the floor divide exactly as before.
+TRUTH_MASS_FLOOR_UNITS = 1.0
+UNSCOREABLE_STATUS = "unscoreable_truth_mass_below_floor"
+
 
 def focal_from_context(context: pd.DataFrame, intervention_id: str) -> str | None:
     """The product whose price moves under `intervention_id` (public context)."""
@@ -59,8 +63,17 @@ def decomposed_headline(frame: pd.DataFrame, focal: str) -> dict[str, Any]:
     sub_abs_true_sum = 0.0
     n_store_weeks_scored = 0
     n_focal_missing = 0
+    stores_seen: set = set()
+    stores_carrying: set = set()
 
     for (sw_store, sw_week), group in work.groupby(["store_id", "week"], sort=True):
+        stores_seen.add(sw_store)
+        # Netting runs over CARRYING store-weeks only: a store-week without the focal has no counterfactual of its own and contributes to neither axis, so the focal test comes first.
+        is_focal = (group["product_id"].to_numpy() == str(focal))
+        if not is_focal.any():
+            n_focal_missing += 1
+            continue
+        stores_carrying.add(sw_store)
         base = group["baseline_units"].to_numpy(float)
         base_total = float(base.sum())
         share = base / base_total if base_total > 0 else np.zeros_like(base)
@@ -69,16 +82,12 @@ def decomposed_headline(frame: pd.DataFrame, focal: str) -> dict[str, Any]:
         # Category-netted residuals: Δq − ΔM·s_base, each side by its own ΔM (= Σ_j Δq, focal INCLUDED), so the ungraded category/incidence magnitude cancels.
         resid_true = dq_true_all - float(dq_true_all.sum()) * share
         resid_pred = dq_pred_all - float(dq_pred_all.sum()) * share
-        is_focal = (group["product_id"].to_numpy() == str(focal))
 
         # own axis — pool the SIGNED netted focal residual.
-        if is_focal.any():
-            rt_f = float(resid_true[is_focal][0])
-            rp_f = float(resid_pred[is_focal][0])
-            own_signed_sum += rp_f - rt_f
-            own_abs_true_sum += abs(rt_f)
-        else:
-            n_focal_missing += 1
+        rt_f = float(resid_true[is_focal][0])
+        rp_f = float(resid_pred[is_focal][0])
+        own_signed_sum += rp_f - rt_f
+        own_abs_true_sum += abs(rt_f)
 
         # substitution axis — pool the ABSOLUTE netted competitor error, raw mass, geometry-blind. No direction score, no proximity weights, no per-store-week ratio, no renormalization.
         is_comp = ~is_focal
@@ -88,14 +97,22 @@ def decomposed_headline(frame: pd.DataFrame, focal: str) -> dict[str, Any]:
             sub_abs_true_sum += float(np.abs(resid_true[is_comp]).sum())
             n_store_weeks_scored += 1
 
-    own_price_wmpe = (own_signed_sum / own_abs_true_sum) if own_abs_true_sum > 0 else None
-    substitution_wape = (sub_abs_err_sum / sub_abs_true_sum) if sub_abs_true_sum > 0 else None
+    # Scoreability guard: a pooled truth denominator at or below the floor yields an explicit unscoreable status (None score), never a division by float residue.
+    own_scoreable = own_abs_true_sum > TRUTH_MASS_FLOOR_UNITS
+    sub_scoreable = sub_abs_true_sum > TRUTH_MASS_FLOOR_UNITS
+    own_price_wmpe = (own_signed_sum / own_abs_true_sum) if own_scoreable else None
+    substitution_wape = (sub_abs_err_sum / sub_abs_true_sum) if sub_scoreable else None
 
     return {
         "own_price_wmpe": (float(own_price_wmpe) if own_price_wmpe is not None else None),
         "substitution_wape": (float(substitution_wape) if substitution_wape is not None else None),
+        "own_price_status": ("scored" if own_scoreable else UNSCOREABLE_STATUS),
+        "substitution_status": ("scored" if sub_scoreable else UNSCOREABLE_STATUS),
+        "truth_mass_floor_units": float(TRUTH_MASS_FLOOR_UNITS),
         "n_store_weeks_scored": int(n_store_weeks_scored),
         "n_store_weeks_focal_missing": int(n_focal_missing),
+        "n_stores_focal_carrying": int(len(stores_carrying)),
+        "n_stores_total": int(len(stores_seen)),
         "own_signed_sum": float(own_signed_sum),
         "own_abs_true_sum": float(own_abs_true_sum),
         "sub_abs_err_sum": float(sub_abs_err_sum),

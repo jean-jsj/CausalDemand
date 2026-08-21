@@ -31,14 +31,25 @@ def revenue_weights(transactions_window: pd.DataFrame) -> pd.Series:
     return revenue / total
 
 
-def build_demand_truth(transactions_full: pd.DataFrame, eval_weeks: list[int]) -> pd.DataFrame:
+def build_demand_truth(
+    transactions_full: pd.DataFrame,
+    eval_weeks: list[int],
+    support_pairs: pd.MultiIndex | None = None,
+) -> pd.DataFrame:
     """Observed holdout sales per (product, store, week) — the sales forecasting truth.
 
     `transactions_full` is the hidden full panel (`hidden/transactions_full_hidden.csv`); the truth is its `units` column over the holdout window.
+
+    `support_pairs`, when supplied, restricts the scored truth to that (product_id, store_id) pair set — the PREDICTION-CONTEXT universe (pairs with at least one positive training-window row, exactly the pairs the public context files describe). A carried-but-zero-training pair stays in the hidden panel but is NOT scored: participants receive no context rows for it and cannot predict it. Pass a string-typed MultiIndex of (product_id, store_id).
     """
     window = transactions_full[
         transactions_full["week"].isin(set(int(w) for w in eval_weeks))
     ].copy()
+    if support_pairs is not None:
+        pairs = pd.MultiIndex.from_arrays(
+            [window["product_id"].astype(str), window["store_id"].astype(str)]
+        )
+        window = window[pairs.isin(support_pairs)]
     window["true_units"] = pd.to_numeric(window["units"], errors="coerce").fillna(0.0)
     return window[KEY_COLUMNS + ["true_units"]].reset_index(drop=True)
 
@@ -47,13 +58,19 @@ def demand_prediction_scores(
     predictions: pd.DataFrame,
     truth: pd.DataFrame,
     weights: pd.Series,
+    row_universe: str = "truth_frame_as_supplied",
 ) -> dict[str, Any]:
     """Demand-WMAPE + Demand-WMPE for one submission.
 
     `predictions` must carry (product_id, store_id, week, predicted_units); `truth` carries the same keys + `true_units`. Scoring runs on the inner join; coverage diagnostics report rows of truth without a prediction — an incomplete submission is flagged, not silently dropped.
+
+    Prediction rows whose key is OUTSIDE the truth support are IGNORED-WITH-COUNT (`n_prediction_rows_ignored_out_of_support`): they enter no numerator or denominator, so a padded or full-grid submission scores identically to its restriction onto the support. `submission_complete` means "no truth row is missing a prediction" over the scored truth universe (`row_universe`).
     """
+    from causaldemand.support import n_rows_out_of_support
+
     pred = predictions[KEY_COLUMNS + ["predicted_units"]].copy()
     pred["predicted_units"] = pd.to_numeric(pred["predicted_units"], errors="coerce")
+    n_ignored = n_rows_out_of_support(pred, truth, KEY_COLUMNS)
     merged = truth.merge(pred, on=KEY_COLUMNS, how="left")
     missing = int(merged["predicted_units"].isna().sum())
     scored = merged.dropna(subset=["predicted_units"]).copy()
@@ -82,6 +99,8 @@ def demand_prediction_scores(
         "n_truth_rows": int(len(truth)),
         "n_scored_rows": int(len(scored)),
         "n_truth_rows_without_prediction": missing,
+        "n_prediction_rows_ignored_out_of_support": n_ignored,
         "submission_complete": missing == 0,
+        "row_universe": row_universe,
         "weighting": "per-product observed revenue share over the public training window",
     }
