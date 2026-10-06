@@ -1,0 +1,15 @@
+Terms of the Dominick's Finer Foods data
+James M. Kilts Center for Marketing, University of Chicago Booth School of Business
+Source: https://www.chicagobooth.edu/research/kilts/research-data/dominicks (October 2026)
+
+These terms apply to causaldemand/dominicks_brands/brands_cer.csv and causaldemand/dominicks_brands/brands_sna.csv,
+which list product codes (UPCs) and brand names from the Dominick's data, and to the datasets that causaldemand builds
+from the Dominick's data. They are not covered by the Apache License 2.0.
+
+The Kilts Center states:
+
+"These data are for academic research purposes only. Users must acknowledge in their working papers and/or
+publications the Kilts Center for Marketing at the University of Chicago Booth School of Business."
+
+Acknowledgement: Dominick's data courtesy of the James M. Kilts Center for Marketing, University of Chicago Booth School
+of Business.

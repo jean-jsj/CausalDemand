@@ -1,0 +1,9 @@
+numpy==2.5.2
+pandas==3.0.5
+scikit-learn==1.9.0
+scipy==1.18.0
+torch==2.13.0
+tabpfn==8.5.0
+tabfm[pytorch]==1.0.1
+chronos-forecasting==2.3.1
+tqdm==4.70.1

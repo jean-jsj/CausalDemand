@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use CausalDemand, please cite the paper listed under preferred-citation."
+type: software
+title: "CausalDemand"
+abstract: "A retail-demand benchmark that scores whether a method recovers the causal effect of price on sales, with the download and scoring package and the reference models. License: Apache-2.0 AND LicenseRef-Dominicks-Kilts. The code is under Apache-2.0 (LICENSE); the brand maps in causaldemand/dominicks_brands/ are not under Apache-2.0: they are for academic research only, under the Kilts Center's terms for the Dominick's data (LICENSES/LicenseRef-Dominicks-Kilts.txt)."
+authors:
+  - family-names: Hong
+    given-names: Juwon
+    affiliation: "Seoul National University"
+  - family-names: Hwang
+    given-names: Minha
+    affiliation: "Microsoft"
+  - family-names: Shankar
+    given-names: Venkatesh
+    affiliation: "Cox School of Business, Southern Methodist University"
+repository-code: "https://github.com/jean-jsj/CausalDemand"
+identifiers:
+  - type: url
+    value: "https://huggingface.co/datasets/jean-jsj/CausalDemand"
+    description: "The released datasets on Hugging Face"
+version: "2.0.0"
+keywords:
+  - causal inference
+  - demand estimation
+  - price elasticity
+  - benchmark
+  - retail
+preferred-citation:
+  type: unpublished
+  title: "CausalDemand: Benchmarking Causal Recovery of Demand from Retail Transactions and Product Text"
+  authors:
+    - family-names: Hong
+      given-names: Juwon
+      affiliation: "Seoul National University"
+    - family-names: Hwang
+      given-names: Minha
+      affiliation: "Microsoft"
+    - family-names: Shankar
+      given-names: Venkatesh
+      affiliation: "Cox School of Business, Southern Methodist University"
+  notes: "Working paper"
+  year: 2026

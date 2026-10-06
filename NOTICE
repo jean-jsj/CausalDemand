@@ -1,0 +1,8 @@
+CausalDemand
+Copyright 2026 Juwon Hong, Minha Hwang and Venkatesh Shankar
+
+The files causaldemand/dominicks_brands/brands_cer.csv and brands_sna.csv list product codes (UPCs) and brand names
+from the Dominick's Finer Foods data of the James M. Kilts Center for Marketing, University of Chicago Booth School of
+Business. They are not covered by the Apache License 2.0: they are for academic research only, under the Kilts Center's
+terms in LICENSES/LicenseRef-Dominicks-Kilts.txt. Dominick's data courtesy of the James M. Kilts Center for Marketing,
+University of Chicago Booth School of Business.

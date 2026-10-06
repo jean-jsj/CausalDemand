@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "causaldemand"
+version = "2.0.0"
+description = "CausalDemand: synthetic and observed retail sales datasets for testing whether a method predicts how sales respond to price changes. Download, scoring and rerun tools (rerun needs Python >= 3.12)."
+readme = "README.md"
+license = "Apache-2.0 AND LicenseRef-Dominicks-Kilts"
+license-files = ["LICENSE", "NOTICE", "LICENSES/LicenseRef-Dominicks-Kilts.txt"]
+authors = [
+    {name = "Juwon Hong"},
+    {name = "Minha Hwang"},
+    {name = "Venkatesh Shankar"},
+]
+requires-python = ">=3.9"
+keywords = ["benchmark", "causal inference", "counterfactual prediction", "demand estimation",
+            "price elasticity", "retail", "synthetic data"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "scipy>=1.13",
+    "pyarrow>=14",
+    "huggingface_hub>=0.23",
+    "matplotlib>=3.5",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.scripts]
+causaldemand = "causaldemand.cli:main"
+
+[project.urls]
+Dataset = "https://huggingface.co/datasets/jean-jsj/CausalDemand"
+
+[tool.setuptools]
+packages = ["causaldemand", "causaldemand.dominicks_brands", "causaldemand.metrics", "causaldemand.models",
+            "causaldemand.models.baselines", "causaldemand.models.foundation"]
+
+[tool.setuptools.package-dir]
+"causaldemand.metrics" = "metrics"
+"causaldemand.models" = "models"
+"causaldemand.models.baselines" = "models/baselines"
+"causaldemand.models.foundation" = "models/foundation"
+
+[tool.setuptools.package-data]
+"causaldemand.dominicks_brands" = ["*.csv"]
+"causaldemand.models" = ["requirements.txt", "requirements-fm.txt", "requirements-fm.lock"]
+
+[tool.pytest.ini_options]
+testpaths = ["metrics"]
