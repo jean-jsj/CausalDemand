@@ -21,8 +21,7 @@ crackers from Dominick's Finer Foods (60 products each, in 81 and 82 stores). Ev
 Running a model on both shows how vulnerable it is to confounding, and any gap in its price effects can be attributed
 to confounding alone.
 
-3️⃣ **Valid instruments.** Two valid instruments come with the data, so methods can also be tested on correcting the
-bias.
+3️⃣ **Valid instruments.** Two instruments come with the data, so methods can also be tested on correcting the bias.
 
 4️⃣ **Equation-based and agent-based simulation.** Sales are simulated in two ways: by an equation for each product and
 store, or by individual shoppers making their own choices. Testing on both shows whether a method works regardless of
@@ -31,19 +30,37 @@ how demand is modeled.
 ## Leaderboard
 
 <table>
-<tr><th rowspan="2">Model</th><th colspan="2">🟦 Facial tissue</th><th colspan="2">🟩 Yogurt</th><th colspan="2">🟧 Cereals</th><th colspan="2">🟪 Snack crackers</th></tr>
-<tr><th><sub>Counter-<br>factual<br>WMAPE</sub></th><th><sub>Forecast<br>WMAPE</sub></th><th><sub>Counter-<br>factual<br>WMAPE</sub></th><th><sub>Forecast<br>WMAPE</sub></th><th><sub>Sign<br>accuracy</sub></th><th><sub>Forecast<br>WMAPE</sub></th><th><sub>Sign<br>accuracy</sub></th><th><sub>Forecast<br>WMAPE</sub></th></tr>
-<tr><td>Hier.&nbsp;linear&nbsp;(IV)</td><td align="center"><b>0.049</b>&nbsp;🥇</td><td align="center">0.486</td><td align="center"><b>0.152</b>&nbsp;🥇</td><td align="center">0.549</td><td align="center"><b>1.000</b>&nbsp;🥇</td><td align="center">0.521</td><td align="center"><b>1.000</b>&nbsp;🥇</td><td align="center">0.505</td></tr>
-<tr><td>Double&nbsp;ML&nbsp;(IV)</td><td align="center"><b>0.049</b>&nbsp;🥇</td><td align="center">0.454</td><td align="center"><b>0.152</b>&nbsp;🥇</td><td align="center">0.536</td><td align="center"><b>1.000</b>&nbsp;🥇</td><td align="center">0.442</td><td align="center"><b>1.000</b>&nbsp;🥇</td><td align="center">0.463</td></tr>
-<tr><td>TabFM</td><td align="center">0.089&nbsp;🥉</td><td align="center">0.493</td><td align="center">0.179</td><td align="center">0.628</td><td align="center">0.879</td><td align="center">0.494</td><td align="center">0.847</td><td align="center">0.484</td></tr>
-<tr><td>Chronos-2</td><td align="center">0.089&nbsp;🥉</td><td align="center">0.452</td><td align="center">0.171&nbsp;🥉</td><td align="center">0.547</td><td align="center">0.942&nbsp;🥉</td><td align="center">0.499</td><td align="center">0.834</td><td align="center"><b>0.368</b></td></tr>
-<tr><td>TabPFN</td><td align="center">0.102</td><td align="center">0.448</td><td align="center">0.187</td><td align="center">0.532</td><td align="center">0.788</td><td align="center">0.380</td><td align="center">0.844</td><td align="center">0.383</td></tr>
-<tr><td>LightGBM</td><td align="center">0.106</td><td align="center"><b>0.431</b></td><td align="center">0.188</td><td align="center"><b>0.500</b></td><td align="center">0.862</td><td align="center">0.367</td><td align="center">0.915</td><td align="center">0.389</td></tr>
-<tr><td>Random&nbsp;forest</td><td align="center">0.144</td><td align="center">0.448</td><td align="center">0.217</td><td align="center">0.528</td><td align="center">0.760</td><td align="center">0.385</td><td align="center">0.937&nbsp;🥉</td><td align="center">0.424</td></tr>
-<tr><td>XGBoost</td><td align="center">0.157</td><td align="center">0.436</td><td align="center">0.239</td><td align="center">0.504</td><td align="center">0.752</td><td align="center"><b>0.360</b></td><td align="center">0.824</td><td align="center">0.387</td></tr>
+<tr>
+<td valign="top">
+<table>
+<tr><th>#</th><th>🟦&nbsp;Facial&nbsp;tissue</th><th><sub>Counterfactual<br>WMAPE</sub></th><th><sub>Forecast<br>WMAPE</sub></th></tr>
+<tr><td align="center">🥇<br>🥇<br>🥉<br>🥉<br>5<br>6<br>7<br>8</td><td>Hier.&nbsp;linear&nbsp;(IV)<br>Double&nbsp;ML&nbsp;(IV)<br>TabFM<br>Chronos-2<br>TabPFN<br>LightGBM<br>Random&nbsp;forest<br>XGBoost</td><td align="center"><b>0.049</b><br><b>0.049</b><br>0.089<br>0.089<br>0.102<br>0.106<br>0.144<br>0.157</td><td align="center">0.486<br>0.454<br>0.493<br>0.452<br>0.448<br><b>0.431</b><br>0.448<br>0.436</td></tr>
+</table>
+</td>
+<td valign="top">
+<table>
+<tr><th>#</th><th>🟩&nbsp;Yogurt</th><th><sub>Counterfactual<br>WMAPE</sub></th><th><sub>Forecast<br>WMAPE</sub></th></tr>
+<tr><td align="center">🥇<br>🥇<br>🥉<br>4<br>5<br>6<br>7<br>8</td><td>Hier.&nbsp;linear&nbsp;(IV)<br>Double&nbsp;ML&nbsp;(IV)<br>Chronos-2<br>TabFM<br>TabPFN<br>LightGBM<br>Random&nbsp;forest<br>XGBoost</td><td align="center"><b>0.152</b><br><b>0.152</b><br>0.171<br>0.179<br>0.187<br>0.188<br>0.217<br>0.239</td><td align="center">0.549<br>0.536<br>0.547<br>0.628<br>0.532<br><b>0.500</b><br>0.528<br>0.504</td></tr>
+</table>
+</td>
+</tr>
+<tr>
+<td valign="top">
+<table>
+<tr><th>#</th><th>🟧&nbsp;Cereals</th><th><sub>Sign<br>accuracy</sub></th><th><sub>Forecast<br>WMAPE</sub></th></tr>
+<tr><td align="center">🥇<br>🥇<br>🥉<br>4<br>5<br>6<br>7<br>8</td><td>Double&nbsp;ML&nbsp;(IV)<br>Hier.&nbsp;linear&nbsp;(IV)<br>Chronos-2<br>TabFM<br>LightGBM<br>TabPFN<br>Random&nbsp;forest<br>XGBoost</td><td align="center"><b>1.000</b><br><b>1.000</b><br>0.942<br>0.879<br>0.862<br>0.788<br>0.760<br>0.752</td><td align="center">0.442<br>0.521<br>0.499<br>0.494<br>0.367<br>0.380<br>0.385<br><b>0.360</b></td></tr>
+</table>
+</td>
+<td valign="top">
+<table>
+<tr><th>#</th><th>🟪&nbsp;Snack&nbsp;crackers</th><th><sub>Sign<br>accuracy</sub></th><th><sub>Forecast<br>WMAPE</sub></th></tr>
+<tr><td align="center">🥇<br>🥇<br>🥉<br>4<br>5<br>6<br>7<br>8</td><td>Double&nbsp;ML&nbsp;(IV)<br>Hier.&nbsp;linear&nbsp;(IV)<br>Random&nbsp;forest<br>LightGBM<br>TabFM<br>TabPFN<br>Chronos-2<br>XGBoost</td><td align="center"><b>1.000</b><br><b>1.000</b><br>0.937<br>0.915<br>0.847<br>0.844<br>0.834<br>0.824</td><td align="center">0.463<br>0.505<br>0.424<br>0.389<br>0.484<br>0.383<br><b>0.368</b><br>0.387</td></tr>
+</table>
+</td>
+</tr>
 </table>
 
-For the simulated categories, the table shows only the confounded datasets; each value is the average over five seeds
+For the simulated categories, the tables show only the confounded datasets; each value is the average over five seeds
 and both demand models. The real categories have no counterfactual answer key, so models are ranked by sign
 accuracy: the share of 10% price increases for which the model correctly predicts lower sales.
 
@@ -81,7 +98,7 @@ causaldemand <command> <category> [<predictions_dir> | <model>] [--tissue-dose] 
 - `snack-crackers`: snack crackers, real sales from Dominick's (1 dataset)
 - `all`: every dataset (82), for `download` and `rescore` only
 
-### Score your method
+**Score your method**
 
 1. Download a category:
 
