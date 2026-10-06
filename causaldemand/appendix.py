@@ -9,7 +9,7 @@ from scipy import stats
 
 from causaldemand._code import panel_scorer
 from causaldemand.names import TABLE_CONFIGURATIONS
-from causaldemand.realdata import B, RNG_SEED, _draw_matrix
+from causaldemand.realdata import B, RNG_SEED, _draw_matrix, _quiet_numpy
 from causaldemand.sources import SourceError
 from causaldemand.tables import (ALL_MODELS, CPU_MODELS, DEFAULT_SET, DEFAULT_SET_NOTE, MODEL_GROUPS, MODEL_LABELS,
                                  SAMPLED_MODELS, SAMPLER_NOTE, SAMPLER_RUNS, SEEDS, CF, FC, Table, TableError,
@@ -80,11 +80,13 @@ def check_store_sums(sums: dict, per_scenario: pd.DataFrame, forecast_wmape: flo
 
 
 def draw_metrics(z, W):
-    acc = (W @ z["A"].T) / (W @ z["Q"].T)
-    bias = (W @ z["Bn"].T) / (W @ z["D"].T)
-    sign = np.sign(W @ z["S"].T)
+    with _quiet_numpy():
+        acc = (W @ z["A"].T) / (W @ z["Q"].T)
+        bias = (W @ z["Bn"].T) / (W @ z["D"].T)
+        sign = np.sign(W @ z["S"].T)
+        forecast = (W @ z["F"]) / (W @ z["Fq"])
     return {"accuracy": np.nanmean(acc, 1), "abs_bias": np.nanmean(np.abs(bias), 1),
-            "share_overstated": np.nanmean(bias * sign > 0, 1), "forecast": (W @ z["F"]) / (W @ z["Fq"])}
+            "share_overstated": np.nanmean(bias * sign > 0, 1), "forecast": forecast}
 
 
 def kendall_w(R: np.ndarray) -> float:

@@ -207,8 +207,8 @@ def count_matrices(moved: pd.DataFrame, dq: np.ndarray, qhat: np.ndarray, n_scen
 
 
 def metrics(z: dict, Wm: np.ndarray, sel: dict) -> dict:
-    C, NZ, N, Z = (Wm @ z[k].T for k in ("C", "NZ", "N", "Z"))
     with _quiet_numpy():
+        C, NZ, N, Z = (Wm @ z[k].T for k in ("C", "NZ", "N", "Z"))
         out = {"forecast_wmape": (Wm @ z["F"]) / (Wm @ z["Fq"])}
         for d, s in sel.items():
             c, nz, n, zz = C[:, s], NZ[:, s], N[:, s], Z[:, s]
