@@ -1,9 +1,15 @@
 # CausalDemand: Benchmarking Causal Recovery of Demand from Retail Transactions and Product Text
 
+<p align="center">
+  <a href="https://huggingface.co/datasets/jean-jsj/CausalDemand"><img alt="Dataset: Hugging Face" src="https://img.shields.io/badge/Dataset-Hugging%20Face-FFD21E?labelColor=555555&logo=huggingface&logoColor=white"></a>
+  <a href="#license"><img alt="License: Apache-2.0 + CC BY-NC 4.0" src="https://img.shields.io/badge/License-Apache--2.0%20%2B%20CC%20BY--NC%204.0-4E8F5A?labelColor=555555"></a>
+  <a href="https://github.com/jean-jsj/CausalDemand/actions/workflows/tests.yml"><img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/jean-jsj/CausalDemand/tests.yml?branch=main&label=Tests&logo=github&labelColor=555555"></a>
+</p>
+
 A benchmark that scores methods on how retail sales respond to a change in price, not only on how well they forecast
 sales.
 
-How the CausalDemand datasets are generated
+## How the CausalDemand datasets are generated
 
 ![How the CausalDemand datasets are generated](https://raw.githubusercontent.com/jean-jsj/CausalDemand/main/assets/fig_pipeline.png)
 
@@ -25,71 +31,21 @@ how demand is modeled.
 ## Leaderboard
 
 <table>
-<tr>
-<td valign="top">
-🟦 <b>Facial tissue</b> (simulated)
-<table>
-<tr><th>#</th><th>Model</th><th>Counterfactual WMAPE</th><th>Forecast WMAPE</th></tr>
-<tr><td align="center">🥇</td><td>Hier. linear (IV)</td><td align="center"><b>0.049</b></td><td align="center">0.486</td></tr>
-<tr><td align="center">🥇</td><td>Double ML (IV)</td><td align="center"><b>0.049</b></td><td align="center">0.454</td></tr>
-<tr><td align="center">🥉</td><td>TabFM</td><td align="center">0.089</td><td align="center">0.493</td></tr>
-<tr><td align="center">🥉</td><td>Chronos-2</td><td align="center">0.089</td><td align="center">0.452</td></tr>
-<tr><td align="center">5</td><td>TabPFN</td><td align="center">0.102</td><td align="center">0.448</td></tr>
-<tr><td align="center">6</td><td>LightGBM</td><td align="center">0.106</td><td align="center"><b>0.431</b></td></tr>
-<tr><td align="center">7</td><td>Random forest</td><td align="center">0.144</td><td align="center">0.448</td></tr>
-<tr><td align="center">8</td><td>XGBoost</td><td align="center">0.157</td><td align="center">0.436</td></tr>
-</table>
-</td>
-<td valign="top">
-🟩 <b>Yogurt</b> (simulated)
-<table>
-<tr><th>#</th><th>Model</th><th>Counterfactual WMAPE</th><th>Forecast WMAPE</th></tr>
-<tr><td align="center">🥇</td><td>Hier. linear (IV)</td><td align="center"><b>0.152</b></td><td align="center">0.549</td></tr>
-<tr><td align="center">🥇</td><td>Double ML (IV)</td><td align="center"><b>0.152</b></td><td align="center">0.536</td></tr>
-<tr><td align="center">🥉</td><td>Chronos-2</td><td align="center">0.171</td><td align="center">0.547</td></tr>
-<tr><td align="center">4</td><td>TabFM</td><td align="center">0.179</td><td align="center">0.628</td></tr>
-<tr><td align="center">5</td><td>TabPFN</td><td align="center">0.187</td><td align="center">0.532</td></tr>
-<tr><td align="center">6</td><td>LightGBM</td><td align="center">0.188</td><td align="center"><b>0.500</b></td></tr>
-<tr><td align="center">7</td><td>Random forest</td><td align="center">0.217</td><td align="center">0.528</td></tr>
-<tr><td align="center">8</td><td>XGBoost</td><td align="center">0.239</td><td align="center">0.504</td></tr>
-</table>
-</td>
-</tr>
-<tr>
-<td valign="top">
-🟧 <b>Ready-to-eat cereals</b> (real)
-<table>
-<tr><th>#</th><th>Model</th><th>Sign accuracy</th><th>Forecast WMAPE</th></tr>
-<tr><td align="center">🥇</td><td>Double ML (IV)</td><td align="center"><b>1.000</b></td><td align="center">0.442</td></tr>
-<tr><td align="center">🥇</td><td>Hier. linear (IV)</td><td align="center"><b>1.000</b></td><td align="center">0.521</td></tr>
-<tr><td align="center">🥉</td><td>Chronos-2</td><td align="center">0.942</td><td align="center">0.499</td></tr>
-<tr><td align="center">4</td><td>TabFM</td><td align="center">0.879</td><td align="center">0.494</td></tr>
-<tr><td align="center">5</td><td>LightGBM</td><td align="center">0.862</td><td align="center">0.367</td></tr>
-<tr><td align="center">6</td><td>TabPFN</td><td align="center">0.788</td><td align="center">0.380</td></tr>
-<tr><td align="center">7</td><td>Random forest</td><td align="center">0.760</td><td align="center">0.385</td></tr>
-<tr><td align="center">8</td><td>XGBoost</td><td align="center">0.752</td><td align="center"><b>0.360</b></td></tr>
-</table>
-</td>
-<td valign="top">
-🟪 <b>Snack crackers</b> (real)
-<table>
-<tr><th>#</th><th>Model</th><th>Sign accuracy</th><th>Forecast WMAPE</th></tr>
-<tr><td align="center">🥇</td><td>Double ML (IV)</td><td align="center"><b>1.000</b></td><td align="center">0.463</td></tr>
-<tr><td align="center">🥇</td><td>Hier. linear (IV)</td><td align="center"><b>1.000</b></td><td align="center">0.505</td></tr>
-<tr><td align="center">🥉</td><td>Random forest</td><td align="center">0.937</td><td align="center">0.424</td></tr>
-<tr><td align="center">4</td><td>LightGBM</td><td align="center">0.915</td><td align="center">0.389</td></tr>
-<tr><td align="center">5</td><td>TabFM</td><td align="center">0.847</td><td align="center">0.484</td></tr>
-<tr><td align="center">6</td><td>TabPFN</td><td align="center">0.844</td><td align="center">0.383</td></tr>
-<tr><td align="center">7</td><td>Chronos-2</td><td align="center">0.834</td><td align="center"><b>0.368</b></td></tr>
-<tr><td align="center">8</td><td>XGBoost</td><td align="center">0.824</td><td align="center">0.387</td></tr>
-</table>
-</td>
-</tr>
+<tr><th rowspan="2">Model</th><th colspan="2">🟦 Facial tissue</th><th colspan="2">🟩 Yogurt</th><th colspan="2">🟧 Cereals</th><th colspan="2">🟪 Snack crackers</th></tr>
+<tr><th><sub>Counter-<br>factual<br>WMAPE</sub></th><th><sub>Forecast<br>WMAPE</sub></th><th><sub>Counter-<br>factual<br>WMAPE</sub></th><th><sub>Forecast<br>WMAPE</sub></th><th><sub>Sign<br>accuracy</sub></th><th><sub>Forecast<br>WMAPE</sub></th><th><sub>Sign<br>accuracy</sub></th><th><sub>Forecast<br>WMAPE</sub></th></tr>
+<tr><td>Hier.&nbsp;linear&nbsp;(IV)</td><td align="center"><b>0.049</b>&nbsp;🥇</td><td align="center">0.486</td><td align="center"><b>0.152</b>&nbsp;🥇</td><td align="center">0.549</td><td align="center"><b>1.000</b>&nbsp;🥇</td><td align="center">0.521</td><td align="center"><b>1.000</b>&nbsp;🥇</td><td align="center">0.505</td></tr>
+<tr><td>Double&nbsp;ML&nbsp;(IV)</td><td align="center"><b>0.049</b>&nbsp;🥇</td><td align="center">0.454</td><td align="center"><b>0.152</b>&nbsp;🥇</td><td align="center">0.536</td><td align="center"><b>1.000</b>&nbsp;🥇</td><td align="center">0.442</td><td align="center"><b>1.000</b>&nbsp;🥇</td><td align="center">0.463</td></tr>
+<tr><td>TabFM</td><td align="center">0.089&nbsp;🥉</td><td align="center">0.493</td><td align="center">0.179</td><td align="center">0.628</td><td align="center">0.879</td><td align="center">0.494</td><td align="center">0.847</td><td align="center">0.484</td></tr>
+<tr><td>Chronos-2</td><td align="center">0.089&nbsp;🥉</td><td align="center">0.452</td><td align="center">0.171&nbsp;🥉</td><td align="center">0.547</td><td align="center">0.942&nbsp;🥉</td><td align="center">0.499</td><td align="center">0.834</td><td align="center"><b>0.368</b></td></tr>
+<tr><td>TabPFN</td><td align="center">0.102</td><td align="center">0.448</td><td align="center">0.187</td><td align="center">0.532</td><td align="center">0.788</td><td align="center">0.380</td><td align="center">0.844</td><td align="center">0.383</td></tr>
+<tr><td>LightGBM</td><td align="center">0.106</td><td align="center"><b>0.431</b></td><td align="center">0.188</td><td align="center"><b>0.500</b></td><td align="center">0.862</td><td align="center">0.367</td><td align="center">0.915</td><td align="center">0.389</td></tr>
+<tr><td>Random&nbsp;forest</td><td align="center">0.144</td><td align="center">0.448</td><td align="center">0.217</td><td align="center">0.528</td><td align="center">0.760</td><td align="center">0.385</td><td align="center">0.937&nbsp;🥉</td><td align="center">0.424</td></tr>
+<tr><td>XGBoost</td><td align="center">0.157</td><td align="center">0.436</td><td align="center">0.239</td><td align="center">0.504</td><td align="center">0.752</td><td align="center"><b>0.360</b></td><td align="center">0.824</td><td align="center">0.387</td></tr>
 </table>
 
-For the simulated categories, the tables show
-only the confounded datasets; each value is the average over five seeds and both demand models. The real categories have no counterfactual answer key, so models are ranked by sign accuracy:
-the share of 10% price increases for which the model correctly predicts lower sales.
+For the simulated categories, the table shows only the confounded datasets; each value is the average over five seeds
+and both demand models. The real categories have no counterfactual answer key, so models are ranked by sign
+accuracy: the share of 10% price increases for which the model correctly predicts lower sales.
 
 ## Install
 
@@ -97,18 +53,12 @@ the share of 10% price increases for which the model correctly predicts lower sa
 
 ```
 pip install causaldemand
+export HF_TOKEN=<your access token>
 ```
 
 - It needs Python 3.9 or later; `rerun` needs Python 3.12 or later.
-- **Hugging Face**: a free account that has accepted the access conditions of the dataset, and its access token in
-  `HF_TOKEN`:
-
-  ```
-  export HF_TOKEN=<your access token>
-  ```
-
-- **Prior Labs (only `rerun <category> tabpfn`)**: a `TABPFN_TOKEN`, which Prior Labs issues once its TabPFN model
-  license is accepted.
+- Accept its access conditions with a free Hugging Face account at
+  <https://huggingface.co/datasets/jean-jsj/CausalDemand>, then set `HF_TOKEN`.
 
 ## Use
 
@@ -118,14 +68,10 @@ causaldemand <command> <category> [<predictions_dir> | <model>] [--tissue-dose] 
 
 **Commands**
 
-- `download <category>`: downloads every dataset of the category into `causaldemand_data/`, one folder per dataset.
-  Cereal and snack crackers are built on your computer from the Kilts Center files (under a minute, about 4 GB of
-  memory).
-- `score <category> <predictions_dir>`: scores your method's predictions on every dataset, next to
-  the reference models.
+- `download <category>`: downloads every dataset of the category into `causaldemand_data/`.
+- `score <category> <predictions_dir>`: scores your method's predictions on every dataset.
 - `rescore <category>`: re-scores the released predictions of the reference models and saves the results.
-- `rerun <category> <model>`: refits one reference model with the paper's settings and checks its predictions
-  against the released runs.
+- `rerun <category> <model>`: refits reference models with the paper's settings.
 
 **Categories**
 
@@ -140,7 +86,6 @@ causaldemand <command> <category> [<predictions_dir> | <model>] [--tissue-dose] 
 1. Download a category:
 
    ```
-   export HF_TOKEN=<your access token>
    causaldemand download tissue
    ```
 
